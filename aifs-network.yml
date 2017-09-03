@@ -1,0 +1,15 @@
+# vim:ts=4
+version: '2'
+networks:
+        default:
+                external:
+                        name: SAFai-network
+services:
+    evm:
+        build:
+            context: .
+            dockerfile: Dockerfile.evm
+        restart: always
+        volumes:
+            - /srv/containers/persistent-data/aifs/blockchain:/srv/aifs/blockchain
+

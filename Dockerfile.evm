@@ -1,0 +1,14 @@
+FROM ubuntu:latest
+# ADD  https://saf.ai/aifs/setup/aifs-install.sh
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update
+RUN apt-get install -y bash build-essential
+RUN mkdir -p /opt/aifs
+ADD ./setup /opt/aifs/
+VOLUME /srv/blockchain
+# Add Tini
+ENV TINI_VERSION v0.16.1
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
+RUN chmod +x /sbin/tini
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD [ "/bin/sh", "-c", "echo 'Hi there, you should replace CMD with something better' 1>&2 ; exit 1" ]
