@@ -1,17 +1,20 @@
 Q=@
 DOCKER=docker
 COMPOSER=docker-compose
-COMPOSITIONS=aifs-network.yml
+COMPOSITIONS=aifs-network.yml aifs-service.yml
 COMPOSE=$(COMPOSER) $(foreach c,$(COMPOSITIONS),-f $(c))
 NETWORK=SAFai-network
 
 
-default: create-network up
+default: network up
 
 build up down start stop:
 	$(Q)$(COMPOSE) $@ 
 
-create-network:
+connect:
+	$(Q)$(COMPOSE) exec evm /bin/bash -i
+
+network:
 	$(Q)$(DOCKER) network ls $(NETWORK) >/dev/null 2>&1 || $(DOCKER) network create $(NETWORK) || exit 0
 
 clean: down

@@ -1,0 +1,11 @@
+# vim:ts=4
+version: '2'
+services:
+    evm:
+        build:
+            context: .
+            dockerfile: Dockerfile.evm
+        restart: always
+        volumes:
+            - /srv/containers/persistent-data/aifs/blockchain:/srv/aifs/blockchain
+

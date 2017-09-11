@@ -1,14 +1,39 @@
 FROM ubuntu:latest
-# ADD  https://saf.ai/aifs/setup/aifs-install.sh
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
-RUN apt-get install -y bash build-essential
-RUN mkdir -p /opt/aifs
-ADD ./setup /opt/aifs/
-VOLUME /srv/blockchain
-# Add Tini
-ENV TINI_VERSION v0.16.1
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
-RUN chmod +x /sbin/tini
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD [ "/bin/sh", "-c", "echo 'Hi there, you should replace CMD with something better' 1>&2 ; exit 1" ]
+RUN apt-get upgrade -y
+RUN apt-get install -qy git mercurial
+RUN apt-get install -qy software-properties-common python-software-properties
+RUN apt-get install -qy libgmp3-dev libreadline6-dev
+RUN apt-get install -qy bash build-essential
+RUN apt-get clean
+RUN add-apt-repository ppa:gophers/archive
+RUN apt-get update
+ENV 	GOLANGVERSION=1.8		\
+	GOPATH=/opt/go 			\
+	ETHEREUM_RELEASE=v1.6.7		\
+	GETHBIN=/opt/go/bin/geth.bin	\
+	SWARMBIN=/opt/go/bin/swarm.bin	\
+	TINI_VERSION=v0.16.1
+ENV PATH="/srv/aifs/bin:/opt/go/bin:/usr/lib/go-${GOLANGVERSION}/bin:$PATH"
+RUN apt-get install -qy golang-${GOLANGVERSION}
+RUN mkdir -p $GOPATH/src/github.com/ethereum
+WORKDIR /opt/go/src/github.com/ethereum
+RUN git clone https://github.com/ethereum/go-ethereum
+WORKDIR /opt/go/src/github.com/ethereum/go-ethereum
+RUN git checkout ${ETHEREUM_RELEASE}
+RUN go get github.com/ethereum/go-ethereum
+RUN go install ./cmd/geth && go install ./cmd/swarm
+RUN mv -v $(which geth) $(which geth).bin && mv -v $(which swarm) $(which swarm).bin
+ENV 	BLOCKCHAIN_DIR=/srv/aifs \
+	BLOCKCHAIN_DATADIR=/var/state/aifs/data
+RUN mkdir -p ${BLOCKCHAIN_DIR} ${BLOCKCHAIN_DATADIR}
+ADD ./setup /srv/aifs 
+RUN chmod a+x ${BLOCKCHAIN_DIR}/bin/setup.sh
+ENV TINI_VERSION=v0.16.1
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /tini.asc
+RUN gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+ && gpg --verify /tini.asc && chmod a+x /tini && mv /tini /sbin/tini
+ENTRYPOINT [ "/sbin/tini", "--" ]
+CMD [ "/bin/bash", "-c", "while : ; do echo -n `date` ': Sleeping for 5 minutes...'; sleep 300; echo; done" ]
