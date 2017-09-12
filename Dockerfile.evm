@@ -25,11 +25,11 @@ RUN git checkout ${ETHEREUM_RELEASE}
 RUN go get github.com/ethereum/go-ethereum
 RUN go install ./cmd/geth && go install ./cmd/swarm
 RUN mv -v $(which geth) $(which geth).bin && mv -v $(which swarm) $(which swarm).bin
-ENV 	BLOCKCHAIN_DIR=/srv/aifs \
-	BLOCKCHAIN_DATADIR=/var/state/aifs/data
-RUN mkdir -p ${BLOCKCHAIN_DIR} ${BLOCKCHAIN_DATADIR}
+ENV 	AIFS_HOME=/srv/aifs \
+	AIFS_DATA=/var/state/aifs/data
+RUN mkdir -p ${AIFS_HOME} ${AIFS_DATA}
 ADD ./setup /srv/aifs 
-RUN chmod a+x ${BLOCKCHAIN_DIR}/bin/setup.sh
+RUN chmod a+x ${AIFS_HOME}/bin/setup.sh
 ENV TINI_VERSION=v0.16.1
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /tini.asc

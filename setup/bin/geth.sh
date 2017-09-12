@@ -2,10 +2,13 @@
 # geth wrapper script
 #
 
+if [ -f ${confdir}/geth-params.conf ] ; then
+	. ${confdir}/get-params.conf
+fi
 GETHBIN=${GETHBIN:-/usr/bin/geth.bin}
 SWARMBIN=${SWARMBIN:-/usr/bin/swarm.bin}
-BLOCKCHAIN_DATADIR=${BLOCKCHAIN_DATADIR:-/var/aifs/data}
+AIFS_DATA=${AIFS_DATA:-/var/aifs/data}
 if [ ! -x $GETHBIN ] ; then
 	die 127 "geth.bin not found"
 fi
-exec ${GETHBIN} --datadir ${BLOCKCHAIN_DATADIR} "$@"
+exec ${GETHBIN} --datadir ${AIFS_DATA} "$@"

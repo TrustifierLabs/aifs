@@ -8,13 +8,15 @@
 # See https://saf.ai/licensing for details
 # 
 
-bindir=${BLOCKCHAIN_DIR}/bin
-sharedir=${BLOCKCHAIN_DIR}/share
+AIFS_DATA=${AIFS_DATA:-/srv/aifs/data}
+bindir=${AIFS_HOME}/bin
+sharedir=${AIFS_HOME}/share
 statedir=/var/state/aifs
-
 test -d ${bindir} || mkdir -p ${bindir}
 test -d ${sharedir} || mkdir -p ${sharedir}
 test -d ${statedir} || mkdir -p ${statedir}
+test -d ${confdir}  || mkdir -p ${confdir}
+
 GETH=${bindir}/geth
 
 T() {
@@ -28,6 +30,7 @@ die() {
 	exit $rv
 }
 
+
 genesis() {
 	GENESISFILE=${statedir}/aifs-ethereum-genesis.json
 	GENESISFILE_TEMPLATE=${sharedir}/genesis-template.json
@@ -36,13 +39,8 @@ genesis() {
 	sed -e "s/{{genesis-nonce}}/0x${NONCE}/g" ${GENESISFILE_TEMPLATE} > ${GENESISFILE}
 	set +x
 	cat ${GENESISFILE}
-	$GETH --datadir ${BLOCKCHAIN_DATADIR} init ${GENESISFILE}
+	$GETH init ${GENESISFILE}
 	return 0
-}
-
-do_docker_build() {
-	BLOCKCHAIN_DATADIR=${BLOCKCHAIN_DATADIR:-/srv/aifs/data}
-	genesis
 }
 
 fix_tools_perms() {
@@ -55,6 +53,6 @@ fix_tools_perms() {
 case "$1" in
 	docker-build)
 		fix_tools_perms
-		do_docker_build
+		genesis
 		;;
 esac
