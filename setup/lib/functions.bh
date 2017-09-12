@@ -1,0 +1,45 @@
+# -*-Shell-script-*-
+# vim:filetype=sh
+# functions This file contains functions to be used by most or all
+#       shell scripts in the /etc/init.d directory.
+
+
+P=${P:-$(basename $0)}
+D=${D:-$(cd $(dirname $0) && pwd)}
+
+bindir=${AIFS_HOME}/bin
+sharedir=${AIFS_HOME}/share
+statedir=/var/state/aifs
+libdir=${AIFS_HOME}/lib
+test -d ${bindir} 	|| mkdir -p ${bindir}
+test -d ${sharedir} 	|| mkdir -p ${sharedir}
+test -d ${statedir} 	|| mkdir -p ${statedir}
+test -d ${libdir} 	|| mkdir -p ${libdir}
+test -d ${confdir}  	|| mkdir -p ${confdir}
+
+strstr() {
+    [ "${1#*$2*}" = "$1" ] && return 1
+    return 0
+}
+
+# Evaluate shvar-style booleans
+is_true() {
+    case "$1" in
+    [tT] | [yY] | [yY][eE][sS] | [tT][rR][uU][eE] | 1)
+        return 0
+        ;;
+    esac
+    return 1
+}
+
+# Evaluate shvar-style booleans
+is_false() {
+    case "$1" in
+    [fF] | [nN] | [nN][oO] | [fF][aA][lL][sS][eE] | 0)
+        return 0
+        ;;
+    esac
+    return 1
+}
+
+return 0

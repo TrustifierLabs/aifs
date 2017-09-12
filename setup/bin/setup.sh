@@ -1,6 +1,6 @@
 #!/bin/bash
 # AiFS setup script.
-# 
+# $Id$ 
 # Canonical version can be found at https://saf.ai/
 # Copyright (C) 2017 saf.ai, Inc. All rights reserved.
 # Copyright (C) 2017 Ahmed Masud <ahmed.masud@trustifier.com>
@@ -8,14 +8,14 @@
 # See https://saf.ai/licensing for details
 # 
 
+
+P=$(basename $0)
+D=$(cd $(dirname $0) && pwd)
+
+AIFS_HOME=${AIFS_HOME:-$(cd $D/.. && pwd)}
 AIFS_DATA=${AIFS_DATA:-/srv/aifs/data}
-bindir=${AIFS_HOME}/bin
-sharedir=${AIFS_HOME}/share
-statedir=/var/state/aifs
-test -d ${bindir} || mkdir -p ${bindir}
-test -d ${sharedir} || mkdir -p ${sharedir}
-test -d ${statedir} || mkdir -p ${statedir}
-test -d ${confdir}  || mkdir -p ${confdir}
+
+[ -f ${libdir}/functions.bh ] && source ${libdir}/functions.bh
 
 GETH=${bindir}/geth
 
@@ -51,8 +51,12 @@ fix_tools_perms() {
 	popd
 }
 case "$1" in
-	docker-build)
+	init)
 		fix_tools_perms
 		genesis
+		;;
+	start)
+		;;
+	stop)
 		;;
 esac
