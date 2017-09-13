@@ -11,6 +11,9 @@ default: network up
 build up down start stop:
 	$(Q)$(COMPOSE) $@ 
 
+rebuild: 
+	$(Q)$(COMPOSE) down && $(COMPOSE) build --no-cache
+
 connect:
 	$(Q)$(COMPOSE) exec evm /bin/bash -i
 

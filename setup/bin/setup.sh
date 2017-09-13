@@ -9,13 +9,14 @@
 # 
 
 
-P=$(basename $0)
-D=$(cd $(dirname $0) && pwd)
+P=$(which $0)
+D=$(cd $(dirname $P) && pwd)
+P=$(basename $P)
 
 AIFS_HOME=${AIFS_HOME:-$(cd $D/.. && pwd)}
 AIFS_DATA=${AIFS_DATA:-/srv/aifs/data}
 
-[ -f ${libdir}/functions.bh ] && source ${libdir}/functions.bh
+[ -f ${AIFS_HOME}/lib/functions.bh ] && source ${AIFS_HOME}/lib/functions.bh
 
 GETH=${bindir}/geth
 
@@ -34,13 +35,13 @@ die() {
 genesis() {
 	GENESISFILE=${statedir}/aifs-ethereum-genesis.json
 	GENESISFILE_TEMPLATE=${sharedir}/genesis-template.json
+	if [ -f ${GENESISFILE} -a -d ${statedir}/geth ]
+	then
+		return 0
+	fi
 	NONCE=$(od -An -N8 -t x8  /dev/urandom | sed s/\ //g)
-	set -x
 	sed -e "s/{{genesis-nonce}}/0x${NONCE}/g" ${GENESISFILE_TEMPLATE} > ${GENESISFILE}
-	set +x
-	cat ${GENESISFILE}
 	$GETH init ${GENESISFILE}
-	return 0
 }
 
 fix_tools_perms() {
@@ -50,13 +51,32 @@ fix_tools_perms() {
 	done
 	popd
 }
+
+start() {
+	if [ ! -f ${statedir}/initialized ] ; then 
+		if ! $D/$P init ; then 
+			exit 
+		fi
+	fi
+	while : ; do 
+		echo "Running $(date)"
+		sleep 300
+	done
+}
+
 case "$1" in
 	init)
 		fix_tools_perms
-		genesis
+		if genesis ; then 
+			touch ${statedir}/initialized
+		fi
 		;;
-	start)
+	start | run)
+		start
 		;;
 	stop)
+		;;
+	dumpvars)
+		set
 		;;
 esac

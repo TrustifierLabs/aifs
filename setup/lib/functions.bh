@@ -4,8 +4,9 @@
 #       shell scripts in the /etc/init.d directory.
 
 
-P=${P:-$(basename $0)}
+P=${P:-$(which $0)}
 D=${D:-$(cd $(dirname $0) && pwd)}
+P=${P:-$(basename $P)}
 
 bindir=${AIFS_HOME}/bin
 sharedir=${AIFS_HOME}/share

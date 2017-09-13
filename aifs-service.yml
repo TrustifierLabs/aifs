@@ -7,5 +7,4 @@ services:
             dockerfile: Dockerfile.evm
         restart: always
         volumes:
-            - /srv/containers/persistent-data/aifs/blockchain:/srv/aifs/blockchain
-
+            - /srv/containers/persistent-data/aifs/data:/var//state/aifs/data

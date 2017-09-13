@@ -16,6 +16,10 @@ ENV 	GOLANGVERSION=1.8		\
 	SWARMBIN=/opt/go/bin/swarm.bin	\
 	TINI_VERSION=v0.16.1
 ENV PATH="/srv/aifs/bin:/opt/go/bin:/usr/lib/go-${GOLANGVERSION}/bin:$PATH"
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /sbin/tini.asc
+RUN gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+ && gpg --verify /sbin/tini.asc && chmod a+x /sbin/tini
 RUN apt-get install -qy golang-${GOLANGVERSION}
 RUN mkdir -p $GOPATH/src/github.com/ethereum
 WORKDIR /opt/go/src/github.com/ethereum
@@ -30,10 +34,7 @@ ENV 	AIFS_HOME=/srv/aifs \
 RUN mkdir -p ${AIFS_HOME} ${AIFS_DATA}
 ADD ./setup /srv/aifs 
 RUN chmod a+x ${AIFS_HOME}/bin/setup.sh
-ENV TINI_VERSION=v0.16.1
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /tini.asc
-RUN gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
- && gpg --verify /tini.asc && chmod a+x /tini && mv /tini /sbin/tini
+
+WORKDIR ${AIFS_HOME}
 ENTRYPOINT [ "/sbin/tini", "--" ]
-CMD [ "/bin/bash", "-c", "while : ; do echo -n `date` ': Sleeping for 5 minutes...'; sleep 300; echo; done" ]
+CMD [ "/bin/bash", "-c", "setup.sh run" ]
