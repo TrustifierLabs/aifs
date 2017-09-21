@@ -8,15 +8,36 @@ P=${P:-$(which $0)}
 D=${D:-$(cd $(dirname $0) && pwd)}
 P=${P:-$(basename $P)}
 
-bindir=${AIFS_HOME}/bin
-sharedir=${AIFS_HOME}/share
-statedir=/var/state/aifs
-libdir=${AIFS_HOME}/lib
-test -d ${bindir} 	|| mkdir -p ${bindir}
-test -d ${sharedir} 	|| mkdir -p ${sharedir}
-test -d ${statedir} 	|| mkdir -p ${statedir}
-test -d ${libdir} 	|| mkdir -p ${libdir}
-test -d ${confdir}  	|| mkdir -p ${confdir}
+config_dirs() {
+	bindir=${AIFS_HOME}/bin
+	sharedir=${AIFS_HOME}/share
+	statedir=/var/state/aifs
+	libdir=${AIFS_HOME}/lib
+	datadir=${AIFS_DATA}
+	test -d ${bindir} 	|| mkdir -p ${bindir}
+	test -d ${sharedir} 	|| mkdir -p ${sharedir}
+	test -d ${statedir} 	|| mkdir -p ${statedir}
+	test -d ${libdir} 	|| mkdir -p ${libdir}
+	test -d ${confdir}  	|| mkdir -p ${confdir}
+}
+
+# from 
+# https://gist.github.com/elucify/c7ccfee9f13b42f11f81
+
+say() {
+	echo "$@" | sed \
+		-e "s/\(\(@\(red\|green\|yellow\|blue\|magenta\|cyan\|white\|reset\|b\|u\)\)\+\)[[]\{2\}\(.*\)[]]\{2\}/\1\4@reset/g" \
+		-e "s/@red/$(tput setaf 1)/g" 	\
+		-e "s/@green/$(tput setaf 2)/g"	\
+		-e "s/@yellow/$(tput setaf 3)/g"	\
+		-e "s/@blue/$(tput setaf 4)/g"	\
+		-e "s/@magenta/$(tput setaf 5)/g"	\
+		-e "s/@cyan/$(tput setaf 6)/g"	\
+		-e "s/@white/$(tput setaf 7)/g"	\
+		-e "s/@reset/$(tput sgr0)/g"	\
+		-e "s/@b/$(tput bold)/g"	\
+		-e "s/@u/$(tput sgr 0 1)/g"
+}
 
 strstr() {
     [ "${1#*$2*}" = "$1" ] && return 1
@@ -43,4 +64,42 @@ is_false() {
     return 1
 }
 
+T() {
+      	echo -n "$@"
+}
+
+info() {
+	say @b@cyan[[[$(T INFO)]]]"    :""$@" 1>&2
+}
+
+warn() {
+	say @b@yellow[[[$(T WARN)]]]"    :""$@" 1>&2
+}
+
+fail() {
+	say @b@red[[[$(T FAIL)]]]"   :""$@" 1>&2
+}
+
+alias failure=fail
+
+error() {
+	say @b@red[[[$(T ERROR)]]]"   :""$@" 1>&2
+}
+
+success() {
+	say @b@green[[[$(T SUCCESS)]]]" :""$@" 1>&2
+}
+
+alias warning=warn
+
+die() {
+	local rv=${1:-127}
+	shift
+	echo $(T Fatal)"(${rv}):" "$@" 1>&2
+	exit $rv
+}
+
+alias fatal=die
+
 return 0
+
