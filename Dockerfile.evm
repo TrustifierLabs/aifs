@@ -1,9 +1,11 @@
 FROM ubuntu:latest
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
+RUN apt-get install -qy apt-utils
+RUN apt-get install -qy software-properties-common python-software-properties
+RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -qy git mercurial
-RUN apt-get install -qy software-properties-common python-software-properties
 RUN apt-get install -qy libgmp3-dev libreadline6-dev
 RUN apt-get install -qy bash build-essential
 RUN apt-get clean
@@ -11,7 +13,7 @@ RUN add-apt-repository ppa:gophers/archive
 RUN apt-get update
 ENV 	GOLANGVERSION=1.8		\
 	GOPATH=/opt/go 			\
-	ETHEREUM_RELEASE=v1.6.7		\
+	ETHEREUM_RELEASE=v1.7.0		\
 	GETHBIN=/opt/go/bin/geth.bin	\
 	SWARMBIN=/opt/go/bin/swarm.bin	\
 	TINI_VERSION=v0.16.1
