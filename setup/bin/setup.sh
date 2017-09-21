@@ -17,26 +17,18 @@ AIFS_HOME=${AIFS_HOME:-$(cd $D/.. && pwd)}
 AIFS_DATA=${AIFS_DATA:-/srv/aifs/data}
 
 [ -f ${AIFS_HOME}/lib/functions.bh ] && source ${AIFS_HOME}/lib/functions.bh
+config_dirs
 
 GETH=${bindir}/geth
 
-T() {
-	echo $1
-}
-
-die() {
-	local rv=${1:-127}
-	shift
-	echo $(T "ERROR")"(${rv}):" $@ 1>&2
-	exit $rv
-}
 
 
 genesis() {
 	GENESISFILE=${statedir}/aifs-ethereum-genesis.json
 	GENESISFILE_TEMPLATE=${sharedir}/genesis-template.json
-	if [ -f ${GENESISFILE} -a -d ${statedir}/geth ]
+	if [ -f ${GENESISFILE} -a -d ${datadir}/geth ]
 	then
+		echo Genesis has already taken place
 		return 0
 	fi
 	NONCE=$(od -An -N8 -t x8  /dev/urandom | sed s/\ //g)
@@ -45,15 +37,16 @@ genesis() {
 }
 
 fix_tools_perms() {
-	pushd ${bindir}
+	pushd ${bindir} >/dev/null 
 	for k in *.sh; do 
 		chmod a+x $k && ln -sf $k $(basename $k .sh)
 	done
-	popd
+	popd >/dev/null 
 }
 
 start() {
-	if [ ! -f ${statedir}/initialized ] ; then 
+	if [ ! -f ${datadir}/initialized ] ; then 
+		echo Looking to see if we need to initialize
 		if ! $D/$P init ; then 
 			exit 
 		fi
@@ -66,9 +59,15 @@ start() {
 
 case "$1" in
 	init)
+		if [ -f ${datadir}/initialized ] ;then
+			info Already initialized on $(grep date: ${datadir}/initialized)
+			exit 0
+		fi
 		fix_tools_perms
 		if genesis ; then 
-			touch ${statedir}/initialized
+			echo "date: $(date)" > ${datadir}/initialized
+		else
+			exit
 		fi
 		;;
 	start | run)
