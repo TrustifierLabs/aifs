@@ -1,0 +1,29 @@
+FROM trustifier/ubuntu-base:latest
+RUN apt-get clean
+RUN add-apt-repository ppa:gophers/archive
+RUN apt-get update
+ENV 	GOLANGVERSION=1.8		\
+	GOPATH=/opt/go 			\
+	ETHEREUM_RELEASE=v1.7.0		\
+	GETHBIN=/opt/go/bin/geth.bin	\
+	SWARMBIN=/opt/go/bin/swarm.bin
+
+ENV PATH="/srv/aifs/bin:/opt/go/bin:/usr/lib/go-${GOLANGVERSION}/bin:$PATH" 
+RUN apt-get install -qy golang-${GOLANGVERSION}
+RUN mkdir -p $GOPATH/src/github.com/ethereum
+WORKDIR /opt/go/src/github.com/ethereum
+RUN git clone https://github.com/ethereum/go-ethereum
+WORKDIR /opt/go/src/github.com/ethereum/go-ethereum
+RUN git checkout ${ETHEREUM_RELEASE}
+RUN go get github.com/ethereum/go-ethereum
+RUN go install ./cmd/geth && go install ./cmd/swarm
+RUN mv -v $(which geth) $(which geth).bin && mv -v $(which swarm) $(which swarm).bin
+ENV 	AIFS_HOME=/srv/aifs \
+	AIFS_DATA=/var/state/aifs/data
+RUN mkdir -p ${AIFS_HOME} ${AIFS_DATA}
+ADD ./setup /srv/aifs 
+RUN chmod a+x ${AIFS_HOME}/bin/setup.sh
+
+WORKDIR ${AIFS_HOME}
+ENTRYPOINT [ "/sbin/tini", "--" ]
+CMD [ "/bin/bash", "-c", "setup.sh run" ]
