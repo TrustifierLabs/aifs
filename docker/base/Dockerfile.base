@@ -1,0 +1,16 @@
+FROM ubuntu:latest
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update
+RUN apt-get install -qy apt-utils
+RUN apt-get install -qy software-properties-common python-software-properties
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get install -qy git mercurial
+RUN apt-get install -qy libgmp3-dev libreadline6-dev
+RUN apt-get install -qy bash build-essential
+ENV TINI_VERSION=v0.16.1
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc /sbin/tini.asc
+RUN gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
+ && gpg --verify /sbin/tini.asc && chmod a+x /sbin/tini
+RUN apt-get clean

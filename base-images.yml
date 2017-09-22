@@ -1,0 +1,9 @@
+version: '2'
+services:
+    base:
+        image: trustifier/ubuntu-base:latest
+        build:
+            context: ./docker/base
+            dockerfile: Dockerfile.base
+        restart: "no"
+                
