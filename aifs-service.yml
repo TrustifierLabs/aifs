@@ -1,10 +1,16 @@
-# vim:ts=4
+# vim:ts=4 sw=4
 version: '2'
 services:
     evm:
         build:
-            context: .
+            context: ./docker/evm
             dockerfile: Dockerfile.evm
         restart: always
         volumes:
             - /srv/containers/persistent-data/aifs/data:/var//state/aifs/data
+
+    san:
+        build:
+            context: ./docker/san
+            dockerfile: Dockerfile.san
+        restart: always

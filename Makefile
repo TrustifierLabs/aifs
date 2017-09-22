@@ -1,9 +1,10 @@
 Q=@
 DOCKER=docker
 COMPOSER=docker-compose
-COMPOSITIONS=aifs-network.yml aifs-service.yml
-COMPOSE=$(COMPOSER) $(foreach c,$(COMPOSITIONS),-f $(c))
-NETWORK=SAFai-network
+COMPOSITIONS:=aifs-network.yml aifs-service.yml
+BASEIMAGES_COMPOSITIONS:=base-images.yml
+COMPOSE:=$(COMPOSER) $(foreach c,$(COMPOSITIONS),-f $(c))
+NETWORK:=SAFai-network
 
 
 default: network up
@@ -23,6 +24,9 @@ network:
 clean: down
 	$(Q)$(COMPOSE) rm
 	$(Q)$(DOCKER) network rm $(NETWORK)
+
+$(foreach t,build up down start stop clean,base-$(t)):
+	$(Q)$(MAKE) COMPOSITIONS="$(BASEIMAGES_COMPOSITIONS)" $(subst base-,,$@)
 
 .PHONY: compose
 
