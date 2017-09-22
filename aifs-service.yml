@@ -9,8 +9,8 @@ services:
         volumes:
             - /srv/containers/persistent-data/aifs/data:/var//state/aifs/data
 
-    san:
+    storage:
         build:
-            context: ./docker/san
-            dockerfile: Dockerfile.san
+            context: ./docker/storage
+            dockerfile: Dockerfile.storage
         restart: always
